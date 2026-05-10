@@ -1,10 +1,11 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://10.211.181.247");
+const socket = io("http://localhost:3000");
 
 function App() {
   const sendPlayPause = () => {
     console.log("clicked");
+    // alert("BUTTON WORKING");
     socket.emit("play-pause");
   };
 

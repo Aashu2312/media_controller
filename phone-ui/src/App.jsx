@@ -1,9 +1,11 @@
 import { io } from "socket.io-client";
-
-const socket = io("http://localhost:3000");
-
+const socket = io("http://10.105.77.247:3000", {
+  transports: ["websocket"],
+});
 function App() {
   const sendPlayPause = () => {
+    console.log("BUTTON CLICKED");
+
     socket.emit("play-pause");
   };
 
@@ -14,7 +16,6 @@ function App() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#111",
       }}
     >
       <button
@@ -23,7 +24,6 @@ function App() {
           padding: "20px 40px",
           fontSize: "24px",
           borderRadius: "12px",
-          border: "none",
         }}
       >
         PLAY / PAUSE

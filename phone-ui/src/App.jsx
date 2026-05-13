@@ -4,8 +4,6 @@ const socket = io("http://localhost:3000");
 
 function App() {
   const sendPlayPause = () => {
-    console.log("clicked");
-    // alert("BUTTON WORKING");
     socket.emit("play-pause");
   };
 
@@ -26,7 +24,6 @@ function App() {
           fontSize: "24px",
           borderRadius: "12px",
           border: "none",
-          cursor: "pointer",
         }}
       >
         PLAY / PAUSE

@@ -1,32 +1,43 @@
 import { io } from "socket.io-client";
+
 const socket = io("http://10.105.77.247:3000", {
   transports: ["websocket"],
 });
+
+function sendCommand(type) {
+  socket.emit("media-command", { type });
+}
+
 function App() {
-  const sendPlayPause = () => {
-    console.log("BUTTON CLICKED");
-
-    socket.emit("play-pause");
-  };
-
   return (
     <div
       style={{
         height: "100vh",
         display: "flex",
+        flexDirection: "column",
+        gap: "20px",
         justifyContent: "center",
         alignItems: "center",
       }}
     >
-      <button
-        onClick={sendPlayPause}
-        style={{
-          padding: "20px 40px",
-          fontSize: "24px",
-          borderRadius: "12px",
-        }}
-      >
+      <button onClick={() => sendCommand("PLAY_PAUSE")}>
         PLAY / PAUSE
+      </button>
+
+      <button onClick={() => sendCommand("VOLUME_UP")}>
+        VOLUME +
+      </button>
+
+      <button onClick={() => sendCommand("VOLUME_DOWN")}>
+        VOLUME -
+      </button>
+
+      <button onClick={() => sendCommand("SEEK_FORWARD")}>
+        SEEK +10s
+      </button>
+
+      <button onClick={() => sendCommand("SEEK_BACKWARD")}>
+        SEEK -10s
       </button>
     </div>
   );

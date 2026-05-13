@@ -18,11 +18,12 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("DEVICE CONNECTED:", socket.id);
 
-  socket.on("play-pause", () => {
-    console.log("PLAY/PAUSE COMMAND RECEIVED");
+ socket.on("media-command", (command) => {
+  console.log("COMMAND:", command);
 
-    io.emit("trigger-play-pause");
-  });
+  io.emit("trigger-media-command", command);
+});
+
 
   socket.on("disconnect", () => {
     console.log("DEVICE DISCONNECTED");

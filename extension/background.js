@@ -18,22 +18,20 @@ socket.on("disconnect", (reason) => {
   console.log("DISCONNECTED:", reason);
 });
 
-socket.on("trigger-play-pause", () => {
-  console.log("PLAY/PAUSE EVENT RECEIVED");
+socket.on("trigger-media-command", (command) => {
+  console.log("COMMAND RECEIVED:", command);
 
   chrome.tabs.query(
     {
-      url: "*://www.youtube.com/*",
+      url: "*://*/*",
     },
     (tabs) => {
       if (!tabs.length) {
-        console.log("NO YOUTUBE TAB FOUND");
+        console.log("NO TAB FOUND");
         return;
       }
 
-      chrome.tabs.sendMessage(tabs[0].id, {
-        type: "PLAY_PAUSE",
-      });
+      chrome.tabs.sendMessage(tabs[0].id, command);
     }
   );
 });

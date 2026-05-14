@@ -59,42 +59,42 @@ function getMediaInfo(media) {
     volume: media.volume,
   };
 }
-
-chrome.runtime.onMessage.addListener((message) =>{
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("COMMAND:", message);
-  
 
+  const media = getMediaElement();
 
-const media = getMediaElement();
-console.log("MEDIA:", media);
+  if (!media) {
+    console.log("NO MEDIA ELEMENT FOUND");
+    return;
+  }
 
+  switch (message.type) {
+    case "PLAY_PAUSE":
+      playPause(media);
+      break;
 
+    case "VOLUME_UP":
+      volumeUp(media);
+      break;
 
-if(!media) {
-  console.log("NO MEDIA ELEMENT FOUND");
-  return;
-  
-}
+    case "VOLUME_DOWN":
+      volumeDown(media);
+      break;
 
-switch (message.type){
-  case "PLAY_PAUSE":
-    playPause(media);
-    break;
-  case "VOLUME_UP":
-    volumeUp(media);
-    break;
-  case "VOLUME_DOWN":
-    volumeDown(media);
-    break;
-  case "SEEK_FORWARD":
-    seekForward(media);
-    break;
-  case "SEEK_BACKWARD":
-    seekBackward(media);
-    break;
-  default:
-    console.log("UNKNOWN COMMAND");
-    
-}
+    case "SEEK_FORWARD":
+      seekForward(media);
+      break;
 
+    case "SEEK_BACKWARD":
+      seekBackward(media);
+      break;
+
+    default:
+      console.log("UNKNOWN COMMAND");
+  }
+
+  sendResponse(getMediaInfo(media));
+
+  return true;
 });

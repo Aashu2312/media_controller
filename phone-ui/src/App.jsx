@@ -1,13 +1,10 @@
 import { io } from "socket.io-client";
+import { useEffect, useState } from "react";
 
+import { SERVER_URL } from "../../config";
 
-import {SERVER_URL} from "../../config";
 const socket = io(SERVER_URL, {
   transports: ["websocket"],
-});
-
-socket.on("media-update", (data) => {
-  console.log("MEDIA UPDATE:", data);
 });
 
 function sendCommand(type) {
@@ -15,6 +12,20 @@ function sendCommand(type) {
 }
 
 function App() {
+  const [mediaInfo, setMediaInfo] = useState(null);
+
+  useEffect(() => {
+    socket.on("media-update", (data) => {
+      console.log("MEDIA UPDATE:", data);
+
+      setMediaInfo(data);
+    });
+
+    return () => {
+      socket.off("media-update");
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -27,23 +38,24 @@ function App() {
       }}
     >
       {mediaInfo && (
-  <div>
-    <h2>{mediaInfo.title}</h2>
+        <div>
+          <h2>{mediaInfo.title}</h2>
 
-    <p>
-      {mediaInfo.paused ? "Paused" : "Playing"}
-    </p>
+          <p>
+            {mediaInfo.paused ? "Paused" : "Playing"}
+          </p>
 
-    <p>
-      {Math.floor(mediaInfo.currentTime)} /
-      {Math.floor(mediaInfo.duration)}
-    </p>
+          <p>
+            {Math.floor(mediaInfo.currentTime)} /
+            {Math.floor(mediaInfo.duration)}
+          </p>
 
-    <p>
-      Volume: {Math.floor(mediaInfo.volume * 100)}%
-    </p>
-  </div>
-)}
+          <p>
+            Volume: {Math.floor(mediaInfo.volume * 100)}%
+          </p>
+        </div>
+      )}
+
       <button onClick={() => sendCommand("PLAY_PAUSE")}>
         PLAY / PAUSE
       </button>

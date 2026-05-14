@@ -20,11 +20,12 @@ socket.on("disconnect", (reason) => {
 });
 
 socket.on("trigger-media-command", (command) => {
-  console.log("COMMAND RECEIVED:", command);
+  console.log("COMMAND RECEIVED:", command.type);
 
   chrome.tabs.query(
     {
-      url: "*://*/*",
+      active: true,
+      currentWindow: true,
     },
     (tabs) => {
       if (!tabs.length) {
@@ -32,7 +33,12 @@ socket.on("trigger-media-command", (command) => {
         return;
       }
 
-      chrome.tabs.sendMessage(tabs[0].id, command);
+      console.log("SENDING TO:", tabs[0].url);
+chrome.tabs.sendMessage(tabs[0].id, command, (response) => {
+  console.log("MEDIA INFO:", response);
+
+  socket.emit("media-info", response);
+});
     }
   );
 });

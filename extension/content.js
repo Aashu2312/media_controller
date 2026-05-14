@@ -50,6 +50,16 @@ function seekBackward(media){
   media.currentTime -= 10;
 }
 
+function getMediaInfo(media) {
+  return {
+    title: document.title,
+    currentTime: media.currentTime,
+    duration: media.duration,
+    paused: media.paused,
+    volume: media.volume,
+  };
+}
+
 chrome.runtime.onMessage.addListener((message) =>{
   console.log("COMMAND:", message);
   

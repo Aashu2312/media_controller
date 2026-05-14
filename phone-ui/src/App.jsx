@@ -6,6 +6,10 @@ const socket = io(SERVER_URL, {
   transports: ["websocket"],
 });
 
+socket.on("media-update", (data) => {
+  console.log("MEDIA UPDATE:", data);
+});
+
 function sendCommand(type) {
   socket.emit("media-command", { type });
 }
@@ -22,6 +26,24 @@ function App() {
         alignItems: "center",
       }}
     >
+      {mediaInfo && (
+  <div>
+    <h2>{mediaInfo.title}</h2>
+
+    <p>
+      {mediaInfo.paused ? "Paused" : "Playing"}
+    </p>
+
+    <p>
+      {Math.floor(mediaInfo.currentTime)} /
+      {Math.floor(mediaInfo.duration)}
+    </p>
+
+    <p>
+      Volume: {Math.floor(mediaInfo.volume * 100)}%
+    </p>
+  </div>
+)}
       <button onClick={() => sendCommand("PLAY_PAUSE")}>
         PLAY / PAUSE
       </button>

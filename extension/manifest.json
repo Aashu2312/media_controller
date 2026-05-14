@@ -1,5 +1,6 @@
 {
   "manifest_version": 3,
+
   "name": "Media Controller",
   "version": "1.0",
 
@@ -9,11 +10,8 @@
   ],
 
   "host_permissions": [
-  "<all_urls>",
-  "http://localhost:3000/*"
-],
-
-  "action": {},
+    "<all_urls>"
+  ],
 
   "background": {
     "service_worker": "background.js",
@@ -22,9 +20,9 @@
 
   "content_scripts": [
     {
-     "matches": [
-  "<all_urls>"
-],
+      "matches": [
+        "<all_urls>"
+      ],
       "js": [
         "content.js"
       ]

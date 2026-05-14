@@ -3,7 +3,8 @@ console.log(io);
 
 console.log("BACKGROUND RUNNING");
 
-const socket = io("http://10.105.77.247:3000", {
+const SERVER_URL = "http://10.105.77.247:3000";
+const socket = io(SERVER_URL, {
   transports: ["websocket"],
 });
 socket.on("connect", () => {

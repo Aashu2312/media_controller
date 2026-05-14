@@ -1,6 +1,8 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://10.105.77.247:3000", {
+
+import {SERVER_URL} from "../../config";
+const socket = io(SERVER_URL, {
   transports: ["websocket"],
 });
 

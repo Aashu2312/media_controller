@@ -95,16 +95,7 @@ Click **Load unpacked** and select the project folder.
 
 ---
 
-## 📸 Screenshots
 
-_Add screenshots here after finalizing the UI._
-
-Suggested screenshots:
-- Extension popup UI
-- Media controls working on YouTube
-- Playback controls on Spotify Web
-
----
 
 ## 🧠 What I Learned
 

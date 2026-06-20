@@ -1,100 +1,194 @@
-console.log("CONTENT SCRIPT ACTIVE:", window.location.href);
-
-console.log("CONTENT SCRIPT LOADED");
-function getMediaElement() {
-  return (
-    document.querySelector("video") ||
-    document.querySelector("audio") ||
-    document.querySelector('[data-testid="audio-player"] audio') ||
-    document.querySelector("audio[src]")
-  );
-
-}
-const media = getMediaElement();
-console.log("MEDIA:", media);
-function playPause(media) {
-
-  const spotifyButton = document.querySelector(
-    '[data-testid="control-button-playpause"]'
-  );
-
-  if (spotifyButton) {
-    spotifyButton.click();
-    console.log("SPOTIFY PLAY/PAUSE CLICKED");
+(() => {
+  if (globalThis.__MEDIA_CONTROLLER_CONTENT_SCRIPT__) {
+    console.log(
+      "MEDIA CONTROLLER CONTENT SCRIPT ALREADY ACTIVE:",
+      window.location.href
+    );
     return;
   }
 
-  if (media.paused) {
-    media.play();
-    console.log("PLAYING");
-  } else {
-    media.pause();
-    console.log("PAUSED");
-  }
-}
-function volumeUp(media){
-  media.volume = Math.min(media.volume + 0.1, 1);
-  console.log("VOLUME", media.volume);
-}
+  globalThis.__MEDIA_CONTROLLER_CONTENT_SCRIPT__ = true;
 
-function volumeDown(media){
-  media.volume = Math.max(media.volume - 0.1, 0);
-  console.log("VOLUME", media.volume);
-}
+  console.log("CONTENT SCRIPT ACTIVE:", window.location.href);
+  console.log("CONTENT SCRIPT LOADED");
 
-
-function seekForward(media){
-  media.currentTime += 10;
-}
-function seekBackward(media){
-  media.currentTime -= 10;
-}
-
-function getMediaInfo(media) {
-  return {
-    title: document.title,
-    currentTime: media.currentTime,
-    duration: media.duration,
-    paused: media.paused,
-    volume: media.volume,
-  };
-}
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("COMMAND:", message);
-
-  const media = getMediaElement();
-
-  if (!media) {
-    console.log("NO MEDIA ELEMENT FOUND");
-    return;
+  function getMediaElement() {
+    return (
+      document.querySelector("video") ||
+      document.querySelector("audio") ||
+      document.querySelector('[data-testid="audio-player"] audio') ||
+      document.querySelector("audio[src]")
+    );
   }
 
-  switch (message.type) {
-    case "PLAY_PAUSE":
-      playPause(media);
-      break;
+  function getPlayPauseButton() {
+    const selectors = [
+      '[data-testid="control-button-playpause"]',
+      ".ytp-play-button",
+      'button[aria-label="Play"]',
+      'button[aria-label="Pause"]',
+    ];
 
-    case "VOLUME_UP":
-      volumeUp(media);
-      break;
+    for (const selector of selectors) {
+      const button = document.querySelector(selector);
 
-    case "VOLUME_DOWN":
-      volumeDown(media);
-      break;
+      if (button) {
+        return button;
+      }
+    }
 
-    case "SEEK_FORWARD":
-      seekForward(media);
-      break;
-
-    case "SEEK_BACKWARD":
-      seekBackward(media);
-      break;
-
-    default:
-      console.log("UNKNOWN COMMAND");
+    return null;
   }
 
-  sendResponse(getMediaInfo(media));
+  async function playPause(media) {
+    const playPauseButton = getPlayPauseButton();
 
-  return true;
-});
+    if (playPauseButton) {
+      playPauseButton.click();
+      console.log("PLAY/PAUSE BUTTON CLICKED");
+      return true;
+    }
+
+    if (!media) {
+      return false;
+    }
+
+    if (media.paused) {
+      await media.play();
+      console.log("PLAYING");
+    } else {
+      media.pause();
+      console.log("PAUSED");
+    }
+
+    return true;
+  }
+
+  function volumeUp(media) {
+    if (!media) {
+      return false;
+    }
+
+    media.volume = Math.min(media.volume + 0.1, 1);
+    console.log("VOLUME", media.volume);
+    return true;
+  }
+
+  function volumeDown(media) {
+    if (!media) {
+      return false;
+    }
+
+    media.volume = Math.max(media.volume - 0.1, 0);
+    console.log("VOLUME", media.volume);
+    return true;
+  }
+
+  function seekForward(media) {
+    if (!media) {
+      return false;
+    }
+
+    media.currentTime = Math.min(
+      media.currentTime + 10,
+      media.duration || media.currentTime + 10
+    );
+    return true;
+  }
+
+  function seekBackward(media) {
+    if (!media) {
+      return false;
+    }
+
+    media.currentTime = Math.max(media.currentTime - 10, 0);
+    return true;
+  }
+
+  function toFiniteNumber(value) {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  function getMediaInfo(media, { ok, command, error = null }) {
+    return {
+      ok,
+      command,
+      error,
+      title: document.title,
+      url: window.location.href,
+      currentTime: media ? toFiniteNumber(media.currentTime) : null,
+      duration: media ? toFiniteNumber(media.duration) : null,
+      paused: media ? media.paused : null,
+      volume: media ? toFiniteNumber(media.volume) : null,
+    };
+  }
+
+  async function handleCommand(message) {
+    const command = message?.type;
+    let media = getMediaElement();
+    let ok = false;
+    let error = null;
+
+    console.log("COMMAND:", message);
+
+    try {
+      switch (command) {
+        case "PLAY_PAUSE":
+          ok = await playPause(media);
+          break;
+
+        case "VOLUME_UP":
+          ok = volumeUp(media);
+          break;
+
+        case "VOLUME_DOWN":
+          ok = volumeDown(media);
+          break;
+
+        case "SEEK_FORWARD":
+          ok = seekForward(media);
+          break;
+
+        case "SEEK_BACKWARD":
+          ok = seekBackward(media);
+          break;
+
+        default:
+          error = "UNKNOWN_COMMAND";
+      }
+    } catch (commandError) {
+      error = commandError?.message || String(commandError);
+    }
+
+    media = getMediaElement();
+
+    if (!ok && !error) {
+      error = "NO_MEDIA_ELEMENT_FOUND";
+      console.log("NO MEDIA ELEMENT FOUND");
+    }
+
+    return getMediaInfo(media, { ok, command, error });
+  }
+
+  const initialMedia = getMediaElement();
+
+  console.log("FOUND MEDIA:", initialMedia);
+  console.log("URL:", window.location.href);
+  console.log("MEDIA:", initialMedia);
+
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    handleCommand(message)
+      .then(sendResponse)
+      .catch((error) => {
+        sendResponse(
+          getMediaInfo(getMediaElement(), {
+            ok: false,
+            command: message?.type,
+            error: error?.message || String(error),
+          })
+        );
+      });
+
+    return true;
+  });
+})();

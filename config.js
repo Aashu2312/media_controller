@@ -1,2 +1,2 @@
-export const SERVER_IP ="10.105.77.247";
-export const SERVER_URL = "http://10.105.77.247:3000";
+export const SERVER_IP = "192.168.0.6";
+export const SERVER_URL = "http://192.168.0.6:3000";
